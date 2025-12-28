@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>관리자 확인 페이지</title>
+<style>
+  body { font-family: sans-serif; background: #f0f2f5; padding: 40px; margin: 0; }
+  .container { max-width: 700px; margin: auto; }
+  h1 { color: #4f46e5; text-align: center; margin-bottom: 30px; }
+  .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid #4f46e5; }
+  .date { font-size: 12px; color: #888; margin-bottom: 8px; }
+  .text { font-size: 15px; color: #333; white-space: pre-wrap; line-height: 1.6; }
+  .no-data { text-align: center; color: #999; margin-top: 50px; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>📥 수신된 데이터 목록</h1>
+    <div id="data-list">데이터를 불러오는 중...</div>
+  </div>
+
+  <script>
+    async function loadIssues() {
+      // [수정] 본인의 ghp_ 토큰을 아래 따옴표 안에 넣으세요
+      const TOKEN = "여기에_토큰_넣기"; 
+      const REPO = "paparata080-create/gemoni";
+
+      try {
+        const res = await fetch(`https://api.github.com/repos/${REPO}/issues?state=all`, {
+          headers: { 'Authorization': `token ${TOKEN}` }
+        });
+        const issues = await res.json();
+        const listDiv = document.getElementById('data-list');
+        listDiv.innerHTML = "";
+
+        if(issues.length === 0) {
+          listDiv.innerHTML = "<p class='no-data'>아직 수신된 데이터가 없습니다.</p>";
+          return;
+        }
+
+        issues.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <div class="date">제출 시간: ${new Date(item.created_at).toLocaleString()}</div>
+            <div class="text">${item.body}</div>
+          `;
+          listDiv.appendChild(card);
+        });
+      } catch (e) {
+        document.getElementById('data-list').innerText = "데이터를 불러오지 못했습니다.";
+      }
+    }
+    loadIssues();
+  </script>
+</body>
+</html>
